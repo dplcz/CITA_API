@@ -2,9 +2,11 @@ from sqlalchemy import BigInteger, Column, Float, Integer, String, Text, DateTim
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+
+
 # print(__name__)
 
-
+# 管理员数据表
 class AdminModel(Base):
     __tablename__ = 'CITA_administrator'
     __table_args__ = {'extend_existing': True}
@@ -16,6 +18,7 @@ class AdminModel(Base):
     latest_login_time = Column(DateTime, nullable=False)
 
 
+# 指导老师信息数据表
 class TeacherModel(Base):
     __tablename__ = 'CITA_teacher'
     __table_args__ = {'extend_existing': True}
