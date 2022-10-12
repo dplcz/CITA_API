@@ -3,6 +3,8 @@ from sqlalchemy.orm import sessionmaker, Session
 import datetime
 from model.main_models import *
 
+# 测试插入老师数据
+
 if __name__ == '__main__':
     engine = create_engine('mysql+pymysql://root:dp20020620@mysql.dplcz.cn:3306/CITA', echo=True)
 
