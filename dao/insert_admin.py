@@ -4,6 +4,8 @@ import datetime
 from model.main_models import *
 from config import config
 
+# 测试插入管理员数据
+
 if __name__ == '__main__':
     engine = create_engine(
         'mysql+pymysql://{}:{}@{}:{}/{}'.format(config['mysqldb']['sql_user'], config['mysqldb']['sql_pass'],
