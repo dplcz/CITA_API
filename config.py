@@ -1,6 +1,6 @@
 import configparser
 
-# TODO ½âÎöÅäÖÃÎÄ¼ş
+# TODO è§£æé…ç½®æ–‡ä»¶
 
 config = configparser.ConfigParser()
 

@@ -8,7 +8,7 @@ from router.index_router import indexRouter
 
 app = FastAPI()
 
-app.include_router(indexRouter, prefix='/index', tags=['主页信息路由'])
+app.include_router(indexRouter, prefix='/index', tags=['涓婚〉淇℃伅璺敱'])
 
 if __name__ == '__main__':
     uvicorn.run(app, host="{}".format(config['web.conf'].get('ip_bind', '127.0.0.1')),

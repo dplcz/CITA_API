@@ -12,7 +12,7 @@ SQLALCHEMY_DATABASE_URL = 'mysql+aiomysql://{}:{}@{}:{}/{}'.format(config['mysql
                                                                    config['mysqldb']['sql_host'],
                                                                    config['mysqldb']['sql_port'],
                                                                    config['mysqldb']['database'])
-# 创建异步连接引擎
+# 鍒涘缓寮傛杩炴帴寮曟搸
 engine = create_async_engine(SQLALCHEMY_DATABASE_URL, encoding='utf8', echo=False,
                              connect_args={'connect_timeout': 120}, pool_pre_ping=True)
 
