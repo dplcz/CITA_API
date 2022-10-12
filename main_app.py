@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
 
 import router.index_router
 from config import config
@@ -7,6 +8,8 @@ from config import config
 from router.index_router import indexRouter
 
 app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"],
+                   allow_headers=["*"], )
 
 app.include_router(indexRouter, prefix='/index', tags=['主页信息路由'])
 
