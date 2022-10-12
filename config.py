@@ -1,5 +1,7 @@
 import configparser
 
+# TODO ½âÎöÅäÖÃÎÄ¼ş
+
 config = configparser.ConfigParser()
 
 config.read('conf.ini')
