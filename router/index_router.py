@@ -25,7 +25,7 @@ def get_dict_result(Model: object, fetch_res):
 @indexRouter.get('/list-teacher')
 async def get_teacher_list(dbs: AsyncSession = Depends(db_session)):
     fetch_temp = await dbs.execute(
-        select(TeacherModel.id, TeacherModel.name, TeacherModel.img_url, TeacherModel.description,
+        select(TeacherModel.id, TeacherModel.name, TeacherModel.img_url,
                TeacherModel.description))
     result = get_dict_result(TeacherModel, fetch_temp)
     return result
