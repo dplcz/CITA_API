@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from main_models import Base, AdminModel
-from config import config
+from main_models import Base
+from config.config import config
 
 if __name__ == '__main__':
     # 创建数据表

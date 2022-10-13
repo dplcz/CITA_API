@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session
 import datetime
 from model.main_models import *
-from config import config
+from config.config import config
 
 # 测试插入管理员数据
 

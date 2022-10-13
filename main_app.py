@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from config import config
+from config.config import config
 
 from router.index_router import indexRouter
 

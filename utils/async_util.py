@@ -1,11 +1,7 @@
-from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.future import *
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy import BigInteger, Column, Float, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.exc import ProgrammingError
 
-from config import config
+from config.config import config
 
 SQLALCHEMY_DATABASE_URL = 'mysql+aiomysql://{}:{}@{}:{}/{}'.format(config['mysqldb']['sql_user'],
                                                                    config['mysqldb']['sql_pass'],
