@@ -30,3 +30,19 @@ class TeacherModel(Base):
     description = Column(Text, nullable=False)
     operation_time = Column(DateTime, nullable=False)
     operation_user = Column(Integer, ForeignKey('CITA_administrator.id'))
+
+
+# 活动信息表
+class ActivityModel(Base):
+    __tablename__ = 'CITA_activity'
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    first_title = Column(String(10), nullable=False)
+    second_title = Column(String(20), nullable=False)
+    time = Column(DateTime, nullable=False)
+    img_url = Column(String(255), nullable=False)
+    detail_page_id = Column(Integer, nullable=False)
+    detail_page_url = Column(String(255), nullable=True)
+    operation_time = Column(DateTime, nullable=False)
+    operation_user = Column(Integer, ForeignKey('CITA_administrator.id'))
