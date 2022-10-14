@@ -42,6 +42,7 @@ class ActivityModel(Base):
     second_title = Column(String(20), nullable=False)
     time = Column(DateTime, nullable=False)
     img_url = Column(String(255), nullable=False)
+    resize_img_url = Column(String(255), nullable=False)
     detail_page_id = Column(Integer, nullable=False)
     detail_page_url = Column(String(255), nullable=True)
     operation_time = Column(DateTime, nullable=False)

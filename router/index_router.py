@@ -34,7 +34,8 @@ async def get_teacher_list(dbs: AsyncSession = Depends(db_session)):
 @indexRouter.get('/latest-activity')
 async def get_latest_activity(dbs: AsyncSession = Depends(db_session)):
     fetch_temp = await dbs.execute(
-        select(ActivityModel.first_title, ActivityModel.second_title, ActivityModel.img_url, ActivityModel.time,
+        select(ActivityModel.first_title, ActivityModel.second_title, ActivityModel.img_url,
+               ActivityModel.resize_img_url, ActivityModel.time,
                ActivityModel.detail_page_id, ActivityModel.detail_page_url).limit(3).order_by(
             ActivityModel.time))
     result = get_dict_result(fetch_temp)
