@@ -6,7 +6,7 @@ from model.main_models import *
 
 from utils.async_util import db_session
 
-indexRouter = APIRouter()
+indexRouter = APIRouter(tags=['主页API接口路由'])
 
 
 def get_dict_result(fetch_res):
