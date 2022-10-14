@@ -31,6 +31,7 @@ async def get_teacher_list(dbs: AsyncSession = Depends(db_session)):
     return result
 
 
+
 @indexRouter.get('/latest-activity')
 async def get_latest_activity(dbs: AsyncSession = Depends(db_session)):
     fetch_temp = await dbs.execute(
