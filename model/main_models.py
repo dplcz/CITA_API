@@ -48,6 +48,7 @@ class ActivityModel(Base):
     operation_time = Column(DateTime, nullable=False, comment='操作时间')
     operation_user = Column(Integer, ForeignKey('CITA_administrator.id'), comment='操作管理员')
 
+
 # 获奖情况表
 class AwardModel(Base):
     __tablename__ = 'CITA_award'
