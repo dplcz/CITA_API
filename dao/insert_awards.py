@@ -13,7 +13,7 @@ if __name__ == '__main__':
                                                 config['mysqldb']['sql_host'], config['mysqldb']['sql_port'],
                                                 config['mysqldb']['database']), echo=True)
     db_session = Session(engine)
-    reader = csv.reader(open('../award_temp.csv', 'r', encoding='utf-8'))
+    reader = csv.reader(open('../lanqiao_temp.csv', 'r', encoding='utf-8'))
     model_list = []
     header = next(reader)
     for i in reader:
