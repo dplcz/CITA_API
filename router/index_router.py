@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from model.main_models import *
@@ -31,13 +31,12 @@ async def get_teacher_list(dbs: AsyncSession = Depends(db_session)):
     return result
 
 
-
 @indexRouter.get('/latest-activity')
 async def get_latest_activity(dbs: AsyncSession = Depends(db_session)):
     fetch_temp = await dbs.execute(
         select(ActivityModel.first_title, ActivityModel.second_title, ActivityModel.img_url,
                ActivityModel.resize_img_url, ActivityModel.time,
                ActivityModel.detail_page_id, ActivityModel.detail_page_url).limit(3).order_by(
-            ActivityModel.time))
+            desc(ActivityModel.time)))
     result = get_dict_result(fetch_temp)
     return result
