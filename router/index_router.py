@@ -40,3 +40,11 @@ async def get_latest_activity(dbs: AsyncSession = Depends(db_session)):
             desc(ActivityModel.time)))
     result = get_dict_result(fetch_temp)
     return result
+
+
+@indexRouter.get('/get-award-count')
+async def get_award_count(dbs: AsyncSession = Depends(db_session)):
+    fetch_temp = await dbs.execute(
+        "select count(id) as count,type from CITA_award group by type;")
+    result = get_dict_result(fetch_temp)
+    return result
