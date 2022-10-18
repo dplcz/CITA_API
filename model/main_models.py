@@ -64,3 +64,20 @@ class AwardModel(Base):
                    nullable=False, comment='获奖等级')
     if_proved = Column(Boolean, nullable=False, default=False, comment='是否有证明')
     proved_img_or_url = Column(String(255), nullable=True, comment='证明图片或文件')
+
+
+class ProjectModel(Base):
+    __tablename__ = 'CITA_project'
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    project_name = Column(String(255), nullable=False, comment='项目名称')
+    project_img_url = Column(String(255), nullable=False, comment='项目图片url')
+    project_url = Column(String(255), nullable=True, comment='项目部署地址，可为空')
+    project_description = Column(Text, nullable=True, comment='项目描述，可为空')
+
+    participant = Column(String(255), nullable=True, comment='参与者，可为空')
+    time = Column(DateTime, nullable=False, comment='创建时间')
+
+    operation_time = Column(DateTime, nullable=False, comment='操作时间')
+    operation_user = Column(Integer, ForeignKey('CITA_administrator.id'), comment='操作管理员')
