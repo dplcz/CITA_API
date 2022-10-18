@@ -48,3 +48,12 @@ async def get_award_count(dbs: AsyncSession = Depends(db_session)):
         "select count(id) as count,type from CITA_award group by type;")
     result = get_dict_result(fetch_temp)
     return result
+
+
+@indexRouter.get('/latest-project')
+async def get_latest_project(dbs: AsyncSession = Depends(db_session)):
+    fetch_temp = await dbs.execute(
+        select(ProjectModel.project_name, ProjectModel.project_img_url, ProjectModel.project_url,
+               ProjectModel.time).limit(5).order_by(desc(ProjectModel.time)))
+    result = get_dict_result(fetch_temp)
+    return result
