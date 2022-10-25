@@ -38,8 +38,8 @@ class ActivityModel(Base):
     __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    first_title = Column(String(10), nullable=False, comment='大标题')
-    second_title = Column(String(20), nullable=False, comment='小标题')
+    first_title = Column(String(255), nullable=False, comment='大标题')
+    second_title = Column(String(255), nullable=False, comment='小标题')
     time = Column(DateTime, nullable=False, comment='活动时间')
     img_url = Column(String(255), nullable=False, comment='活动图片地址')
     resize_img_url = Column(String(255), nullable=False, comment='重建大小图片地址')
