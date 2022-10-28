@@ -27,6 +27,8 @@ pip3 install gunicorn >= 20.1.0
 ip_bind = 0.0.0.0
 # 绑定端口
 port_bind = 9801
+# 生成token的key
+SECRET_KEY = 'zmxjsl'
 
 
 [mysqldb]
