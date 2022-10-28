@@ -5,21 +5,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from model.main_models import *
 
 from utils.async_util import db_session
+from utils.get_data_util import get_dict_result
 
 indexRouter = APIRouter(tags=['主页API接口路由'])
 
 
-def get_dict_result(fetch_res):
-    try:
-        result_temp = fetch_res.fetchall()
-        result = {'code': 0, 'data': []}
-        for i in result_temp:
-            temp = dict(i)
-            # temp.pop('_sa_instance_state')
-            result['data'].append(temp)
-        return result
-    except Exception:
-        return {'code': 1}
+
 
 
 @indexRouter.get('/list-teacher', tags=['获取所有老师信息'])
