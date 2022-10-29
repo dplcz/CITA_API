@@ -21,7 +21,7 @@ async def login(token: str = Cookie(None), username: str = Form(None), password:
             response.set_cookie('token', create_token(username))
             return response
         else:
-            return Response(status_code=400, content='登录过期，请重新登录')
+            return Response(status_code=401, content='登录过期，请重新登录')
     elif username is not None and password is not None:
         fetch_temp = await dbs.execute(select(AdminModel.password).where(AdminModel.name == username))
         result = get_dict_result(fetch_temp)
