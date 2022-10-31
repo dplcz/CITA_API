@@ -1,6 +1,6 @@
 import enum
 
-from fastapi import APIRouter, Depends, Form, Query, Response, Cookie
+from fastapi import APIRouter, Depends, Form, Query, Response, Cookie, Header
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import count
@@ -25,12 +25,14 @@ class ModelType(str, enum.Enum):
 
 
 @manageRouter.post('/login')
-async def login(token: str = Cookie(None), username: str = Form(None), password: str = Form(None),
+async def login(token: str = Cookie(None), origin: str = Header(...), username: str = Form(None),
+                password: str = Form(None),
                 dbs: AsyncSession = Depends(db_session)):
     if token is not None:
         user = judge_token(token)
         if user is not None:
             response = Response(status_code=200)
+            response.init_headers({'Access-control-Allow-Origin': origin})
             response.set_cookie('token', create_token(username), expires=3600, samesite=None)
             return response
         else:
@@ -44,7 +46,8 @@ async def login(token: str = Cookie(None), username: str = Form(None), password:
 
             if result['data'][0]['password'] == password:
                 response = Response(status_code=200)
-                response.set_cookie('token', create_token(username), expires=3600)
+                response.init_headers({'Access-control-Allow-Origin': origin})
+                response.set_cookie('token', create_token(username), expires=3600, samesite=None)
                 return response
     else:
         return Response(status_code=400)
