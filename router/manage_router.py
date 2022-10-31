@@ -31,7 +31,7 @@ async def login(token: str = Cookie(None), username: str = Form(None), password:
         user = judge_token(token)
         if user is not None:
             response = Response(status_code=200)
-            response.set_cookie('token', create_token(username), expires=3600, samesite='None')
+            response.set_cookie('token', create_token(username), expires=3600, samesite=None)
             return response
         else:
             return Response(status_code=401, content='登录过期，请重新登录')
