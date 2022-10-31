@@ -10,6 +10,7 @@ fastapi为异步web框架，使用sqlalchemy支持异步连接数据库
 python >= 3.7
 
 pip3 install fastapi >= 0.75.0
+pip3 install PyJWT >= 2.4.0
 pip3 install sqlalchemy >= 1.4.39
 # 数据库引擎
 pip3 install aiomysql >= 0.1.1
