@@ -8,7 +8,8 @@ from router.index_router import indexRouter
 from router.manage_router import manageRouter
 
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"],
+app.add_middleware(CORSMiddleware, allow_origins=["http://124.221.228.222:9800", "http://192.168.21.1:9800"],
+                   allow_credentials=True, allow_methods=["*"],
                    allow_headers=["*"], )
 
 app.include_router(indexRouter, prefix='/index', tags=['主页信息路由'])
