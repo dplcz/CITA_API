@@ -45,7 +45,7 @@ async def login(token: str = Cookie(None), origin: str = Header(...), username: 
         if user is not None:
             response = Response(status_code=200)
             response.init_headers({'Access-control-Allow-Origin': origin})
-            response.set_cookie('token', create_token(username), expires=3600, samesite=None)
+            response.set_cookie('token', create_token(user), expires=3600, samesite=None)
             return response
         else:
             return Response(status_code=401, content='登录过期，请重新登录')
