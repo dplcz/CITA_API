@@ -50,7 +50,7 @@ async def login(token: str = Cookie(None), origin: str = Header(...), username: 
                 response.set_cookie('token', create_token(username), expires=3600, samesite='None', secure=True)
                 return response
     else:
-        return Response(status_code=400)
+        return Response(status_code=401)
 
 
 @manageRouter.get('/list/{select_type}')
