@@ -12,6 +12,11 @@ indexRouter = APIRouter(tags=['主页API接口路由'])
 
 @indexRouter.get('/list-teacher', tags=['获取所有老师信息'])
 async def get_teacher_list(dbs: AsyncSession = Depends(db_session)):
+    """
+    列出所有老师信息
+    :param dbs: 异步数据库连接
+    :return:
+    """
     fetch_temp = await dbs.execute(
         select(TeacherModel.id, TeacherModel.name, TeacherModel.img_url, TeacherModel.position,
                TeacherModel.description))
@@ -21,6 +26,11 @@ async def get_teacher_list(dbs: AsyncSession = Depends(db_session)):
 
 @indexRouter.get('/latest-activity', tags=['获取最近3个活动信息'])
 async def get_latest_activity(dbs: AsyncSession = Depends(db_session)):
+    """
+    列出最近三个老师信息
+    :param dbs: 异步数据库连接
+    :return:
+    """
     fetch_temp = await dbs.execute(
         select(ActivityModel.first_title, ActivityModel.second_title, ActivityModel.img_url,
                ActivityModel.resize_img_url, ActivityModel.time,
@@ -32,6 +42,11 @@ async def get_latest_activity(dbs: AsyncSession = Depends(db_session)):
 
 @indexRouter.get('/get-award-count', tags=['获取各类奖项数量'])
 async def get_award_count(dbs: AsyncSession = Depends(db_session)):
+    """
+    获取各类奖项数量
+    :param dbs: 异步数据库连接
+    :return:
+    """
     fetch_temp = await dbs.execute(
         "select count(id) as count,type from CITA_award group by type;")
     result = get_dict_result(data=fetch_temp)
@@ -40,6 +55,11 @@ async def get_award_count(dbs: AsyncSession = Depends(db_session)):
 
 @indexRouter.get('/latest-project', tags=['获取最近5个项目'])
 async def get_latest_project(dbs: AsyncSession = Depends(db_session)):
+    """
+    列出最近五个项目
+    :param dbs: 异步数据库连接
+    :return:
+    """
     fetch_temp = await dbs.execute(
         select(ProjectModel.project_name, ProjectModel.project_img_url, ProjectModel.project_url,
                ProjectModel.time).limit(5).order_by(desc(ProjectModel.time)))

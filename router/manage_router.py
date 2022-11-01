@@ -24,10 +24,19 @@ class ModelType(str, enum.Enum):
     activity = 'activity'
 
 
-@manageRouter.post('/login')
+@manageRouter.post('/login', tags=['实现登录和token更新接口'])
 async def login(token: str = Cookie(None), origin: str = Header(...), username: str = Form(None),
                 password: str = Form(None),
                 dbs: AsyncSession = Depends(db_session)):
+    """
+    实现登录和token更新
+    :param token: 用户验证
+    :param origin: 来源网址
+    :param username: 用户名
+    :param password: 密码
+    :param dbs: 异步数据库连接
+    :return:
+    """
     if username is not None and password is not None:
         fetch_temp = await dbs.execute(select(AdminModel.password).where(AdminModel.name == username))
         result = get_dict_result(data=fetch_temp)
@@ -53,9 +62,17 @@ async def login(token: str = Cookie(None), origin: str = Header(...), username: 
         return Response(status_code=401)
 
 
-@manageRouter.get('/list/{select_type}')
+@manageRouter.get('/list/{select_type}', tags=['通过接口名称查询模型数据'])
 async def list_activity(select_type: ModelType, token: str = Cookie(...), page: int = Query(1),
                         dbs: AsyncSession = Depends(db_session)):
+    """
+    查询各种表的数据
+    :param select_type: 查询类型
+    :param token: 用户验证
+    :param page: 分页查询
+    :param dbs: 异步数据库连接
+    :return:
+    """
     user = judge_token(token)
     if user is not None:
         data_model = TYPE_LIST[select_type]
