@@ -28,16 +28,7 @@ class ModelType(str, enum.Enum):
 async def login(token: str = Cookie(None), origin: str = Header(...), username: str = Form(None),
                 password: str = Form(None),
                 dbs: AsyncSession = Depends(db_session)):
-    if token is not None:
-        user = judge_token(token)
-        if user is not None:
-            response = Response(status_code=200)
-            response.init_headers({'Access-control-Allow-Origin': origin})
-            response.set_cookie('token', create_token(username), expires=3600, samesite=None)
-            return response
-        else:
-            return Response(status_code=401, content='登录过期，请重新登录')
-    elif username is not None and password is not None:
+    if username is not None and password is not None:
         fetch_temp = await dbs.execute(select(AdminModel.password).where(AdminModel.name == username))
         result = get_dict_result(data=fetch_temp)
         if len(result['data']) == 0:
@@ -49,6 +40,15 @@ async def login(token: str = Cookie(None), origin: str = Header(...), username: 
                 response.init_headers({'Access-control-Allow-Origin': origin})
                 response.set_cookie('token', create_token(username), expires=3600, samesite=None)
                 return response
+    elif token is not None:
+        user = judge_token(token)
+        if user is not None:
+            response = Response(status_code=200)
+            response.init_headers({'Access-control-Allow-Origin': origin})
+            response.set_cookie('token', create_token(username), expires=3600, samesite=None)
+            return response
+        else:
+            return Response(status_code=401, content='登录过期，请重新登录')
     else:
         return Response(status_code=401)
 
