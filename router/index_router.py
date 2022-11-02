@@ -34,7 +34,8 @@ async def get_latest_activity(dbs: AsyncSession = Depends(db_session)):
     fetch_temp = await dbs.execute(
         select(ActivityModel.first_title, ActivityModel.second_title, ActivityModel.img_url,
                ActivityModel.resize_img_url, ActivityModel.time,
-               ActivityModel.detail_page_id, ActivityModel.detail_page_url).limit(3).order_by(
+               ActivityModel.detail_page_id, ActivityModel.detail_page_url).filter(ActivityModel.type == 0).limit(
+            3).order_by(
             desc(ActivityModel.time)))
     result = get_dict_result(data=fetch_temp)
     return result
@@ -73,7 +74,7 @@ async def get_week_match(page: int = Query(1), dbs: AsyncSession = Depends(db_se
         select(ActivityModel.first_title, ActivityModel.second_title, ActivityModel.img_url,
                ActivityModel.resize_img_url, ActivityModel.time,
                ActivityModel.detail_page_id, ActivityModel.detail_page_url).filter(ActivityModel.type == 1).slice(
-            (page - 1) * 10, page * 10).order_by(
+            (page - 1) * 9, page * 9).order_by(
             desc(ActivityModel.time)))
     result = get_dict_result(data=fetch_temp)
     return result
