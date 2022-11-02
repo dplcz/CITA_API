@@ -1,6 +1,7 @@
 import enum
+from typing import Optional
 
-from fastapi import APIRouter, Depends, Form, Query, Response, Cookie, Header
+from fastapi import APIRouter, Depends, Form, Query, Response, Cookie, Header, Body
 from sqlalchemy import select, desc, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import count
@@ -14,7 +15,8 @@ from utils.token_util import judge_token, create_token
 manageRouter = APIRouter(tags=['管理页面API接口路由'])
 
 # 名称对应数据表
-TYPE_LIST = {'teacher': TeacherModel, 'award': AwardModel, 'project': ProjectModel, 'activity': ActivityModel}
+TYPE_DICT = {'teacher': TeacherModel, 'award': AwardModel, 'project': ProjectModel, 'activity': ActivityModel}
+TYPE_LIST = [TeacherModel, AwardModel, ProjectModel, ActivityModel]
 
 
 class ModelType(str, enum.Enum):
@@ -38,7 +40,7 @@ async def login(token: str = Cookie(None), origin: str = Header(...), username: 
     :return:
     """
     if username is not None and password is not None:
-        fetch_temp = await dbs.execute(select(AdminModel.password).where(AdminModel.name == username))
+        fetch_temp = await dbs.execute(select(AdminModel.password, AdminModel.id).where(AdminModel.name == username))
         result = get_dict_result(data=fetch_temp)
         if len(result['data']) == 0:
             return Response(status_code=401, content='错误的密码或账户')
@@ -47,14 +49,17 @@ async def login(token: str = Cookie(None), origin: str = Header(...), username: 
             if result['data'][0]['password'] == password:
                 response = Response(status_code=200)
                 response.init_headers({'Access-control-Allow-Origin': origin})
-                response.set_cookie('token', create_token(username), expires=3600, samesite=None)
+                response.set_cookie('token', create_token(username, result['data'][0]['id']), expires=3600,
+                                    samesite=None)
                 return response
     elif token is not None:
-        user = judge_token(token)
-        if user is not None:
+        judge_res = judge_token(token)
+        if judge_res is not None:
             response = Response(status_code=200)
             response.init_headers({'Access-control-Allow-Origin': origin})
-            response.set_cookie('token', create_token(user), expires=3600, samesite=None)
+            response.set_cookie('token', create_token(judge_res['user'], judge_res['id']),
+                                expires=3600,
+                                samesite=None)
             return response
         else:
             return Response(status_code=401, content='登录过期，请重新登录')
@@ -73,9 +78,9 @@ async def list_activity(select_type: ModelType, token: str = Cookie(...), page: 
     :param dbs: 异步数据库连接
     :return:
     """
-    user = judge_token(token)
-    if user is not None:
-        data_model = TYPE_LIST[select_type]
+    judge_res = judge_token(token)
+    if judge_res is not None:
+        data_model = TYPE_DICT[select_type]
         fetch_temp = await dbs.execute(
             select(data_model).slice((page - 1) * 10, page * 10))
         count_temp = await dbs.execute(count(data_model.id))
@@ -99,9 +104,9 @@ async def search_activity(search_type: ModelType, token: str = Cookie(...), page
     :return:
     """
 
-    user = judge_token(token)
-    if user is not None:
-        data_model = TYPE_LIST[search_type]
+    judge_res = judge_token(token)
+    if judge_res is not None:
+        data_model = TYPE_DICT[search_type]
         word = '%{}%'.format(query)
         if data_model is ActivityModel:
             rule = or_(*[ActivityModel.first_title.like(word), ActivityModel.second_title.like(word),
@@ -125,5 +130,31 @@ async def search_activity(search_type: ModelType, token: str = Cookie(...), page
         result = get_dict_result(data=fetch_temp, count=count_temp, model=data_model.__name__)
         return result
 
+    else:
+        return Response(status_code=401, content='登录过期，请重新登录')
+
+
+@manageRouter.post('/insert/{insert_type}', tags=['通过接口插入数据'])
+async def insert(insert_type: ModelType, token: str = Cookie(...), data: dict = Body(...),
+                 dbs: AsyncSession = Depends(db_session)):
+    """
+    插入数据
+    :param insert_type: 插入数据表
+    :param token: 用户验证
+    :param data: 数据
+    :param dbs: 异步数据库连接
+    :return:
+    """
+    judge_res = judge_token(token)
+    if judge_res is not None:
+        data_model = TYPE_DICT[insert_type]
+        data['operation_user'] = judge_res['id']
+        try:
+            temp_model = data_model(**data)
+            dbs.add(temp_model)
+            await dbs.commit()
+            return Response(status_code=201, content={'code': 0}, )
+        except ValueError:
+            return Response(status_code=404, content='字段错误！')
     else:
         return Response(status_code=401, content='登录过期，请重新登录')

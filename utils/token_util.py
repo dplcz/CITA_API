@@ -10,7 +10,7 @@ def judge_token(token):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms='HS256')
         # print(payload)
-        return payload['user']
+        return payload
     except ExpiredSignatureError:
         # print('token过期了')
         return None
@@ -19,8 +19,8 @@ def judge_token(token):
         return None
 
 
-def create_token(username):
+def create_token(username, user_id):
     expires = datetime.utcnow() + timedelta(hours=1)
-    to_encode = {'exp': expires, 'user': username}
+    to_encode = {'exp': expires, 'user': username, 'id': user_id}
     encode_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm='HS256')
     return encode_jwt
