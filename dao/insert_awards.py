@@ -19,6 +19,8 @@ if __name__ == '__main__':
     for i in reader:
         if len(i) > 0:
             temp_dict = {key: (value if value != 'True' else True) for key, value in zip(header, i)}
+            temp_dict['operation_time'] = datetime.datetime.now()
+            temp_dict['operation_user'] = 1
             model_list.append(AwardModel(**temp_dict))
     db_session.add_all(model_list)
     db_session.commit()
