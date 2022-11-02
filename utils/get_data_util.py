@@ -9,7 +9,7 @@ def get_dict_result(**kwargs):
         if count is not None:
             result_temp = count.fetchall()[0]
             temp = dict(result_temp)
-            result['total_count'] = temp['count_1']
+            result['total_count'] = temp.get('count_1', None) or temp.get('count', None)
 
         result_temp = data.fetchall()
         for i in result_temp:

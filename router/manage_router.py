@@ -1,7 +1,7 @@
 import enum
 
 from fastapi import APIRouter, Depends, Form, Query, Response, Cookie, Header
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import count
 
@@ -81,5 +81,24 @@ async def list_activity(select_type: ModelType, token: str = Cookie(...), page: 
         count_temp = await dbs.execute(count(data_model.id))
         result = get_dict_result(data=fetch_temp, count=count_temp, model=data_model.__name__)
         return result
+    else:
+        return Response(status_code=401, content='登录过期，请重新登录')
+
+
+@manageRouter.get('/search/{search_type}')
+async def search_activity(search_type: ModelType, token: str = Cookie(...), page: int = Query(1),
+                          query: str = Query(...),
+                          dbs: AsyncSession = Depends(db_session)):
+    user = judge_token(token)
+    if user is not None:
+        data_model = TYPE_LIST[search_type]
+        word = '%{}%'.format(query)
+        if data_model is ActivityModel:
+            rule = or_(*[ActivityModel.first_title.like(word), ActivityModel.second_title.like(word),
+                         ActivityModel.time.like(word)])
+            fetch_temp = await dbs.execute(select(data_model).slice((page - 1) * 10, page * 10).filter(rule))
+            count_temp = await dbs.execute(select(count(data_model.id)).filter(rule))
+            result = get_dict_result(data=fetch_temp, count=count_temp, model=data_model.__name__)
+            return result
     else:
         return Response(status_code=401, content='登录过期，请重新登录')
