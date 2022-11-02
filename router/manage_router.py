@@ -96,9 +96,24 @@ async def search_activity(search_type: ModelType, token: str = Cookie(...), page
         if data_model is ActivityModel:
             rule = or_(*[ActivityModel.first_title.like(word), ActivityModel.second_title.like(word),
                          ActivityModel.time.like(word)])
-            fetch_temp = await dbs.execute(select(data_model).slice((page - 1) * 10, page * 10).filter(rule))
-            count_temp = await dbs.execute(select(count(data_model.id)).filter(rule))
-            result = get_dict_result(data=fetch_temp, count=count_temp, model=data_model.__name__)
-            return result
+
+        elif data_model is ProjectModel:
+            rule = or_(*[ProjectModel.project_name.like(word), ProjectModel.project_description.like(word),
+                         ProjectModel.time.like(word), ProjectModel.participant.like(word)])
+
+        elif data_model is AwardModel:
+            rule = or_(
+                *[AwardModel.game_name.like(word), AwardModel.player_name.like(word), AwardModel.game_time.like(word),
+                  AwardModel.type.like(word), AwardModel.level.like(word)])
+        elif data_model is TeacherModel:
+            rule = or_(
+                *[TeacherModel.name.like(word), TeacherModel.description.like(word), TeacherModel.position.like(word)])
+        else:
+            return Response(status_code=404, content='该模型表不支持查询')
+        fetch_temp = await dbs.execute(select(data_model).slice((page - 1) * 10, page * 10).filter(rule))
+        count_temp = await dbs.execute(select(count(data_model.id)).filter(rule))
+        result = get_dict_result(data=fetch_temp, count=count_temp, model=data_model.__name__)
+        return result
+
     else:
         return Response(status_code=401, content='登录过期，请重新登录')
