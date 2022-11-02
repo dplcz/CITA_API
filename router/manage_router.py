@@ -85,10 +85,20 @@ async def list_activity(select_type: ModelType, token: str = Cookie(...), page: 
         return Response(status_code=401, content='登录过期，请重新登录')
 
 
-@manageRouter.get('/search/{search_type}')
+@manageRouter.get('/search/{search_type}', tags=['通过接口名称模糊搜索数据'])
 async def search_activity(search_type: ModelType, token: str = Cookie(...), page: int = Query(1),
                           query: str = Query(...),
                           dbs: AsyncSession = Depends(db_session)):
+    """
+    模糊搜索数据
+    :param search_type: 搜索数据表
+    :param token: 用户验证
+    :param page: 分页查询
+    :param query: 搜索字符
+    :param dbs: 异步数据库连接
+    :return:
+    """
+
     user = judge_token(token)
     if user is not None:
         data_model = TYPE_LIST[search_type]
