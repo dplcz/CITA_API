@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -63,5 +63,17 @@ async def get_latest_project(dbs: AsyncSession = Depends(db_session)):
     fetch_temp = await dbs.execute(
         select(ProjectModel.project_name, ProjectModel.project_img_url, ProjectModel.project_url,
                ProjectModel.time).limit(5).order_by(desc(ProjectModel.time)))
+    result = get_dict_result(data=fetch_temp)
+    return result
+
+
+@indexRouter.get('/get-week-match', tags=['获取周赛信息'])
+async def get_week_match(page: int = Query(1), dbs: AsyncSession = Depends(db_session)):
+    fetch_temp = await dbs.execute(
+        select(ActivityModel.first_title, ActivityModel.second_title, ActivityModel.img_url,
+               ActivityModel.resize_img_url, ActivityModel.time,
+               ActivityModel.detail_page_id, ActivityModel.detail_page_url).filter(ActivityModel.type == 1).slice(
+            (page - 1) * 10, page * 10).order_by(
+            desc(ActivityModel.time)))
     result = get_dict_result(data=fetch_temp)
     return result
