@@ -153,7 +153,7 @@ async def insert(insert_type: ModelType, token: str = Cookie(...), data: dict = 
             temp_model = data_model(**data)
             dbs.add(temp_model)
             await dbs.commit()
-            return {'code': 0}
+            return Response(status_code=201, content='success')
         except ValueError:
             return Response(status_code=404, content='字段错误！')
     else:
