@@ -46,12 +46,13 @@ class ActivityModel(Base, MyBaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     first_title = Column(String(255), nullable=False, comment='大标题')
-    second_title = Column(String(255), nullable=False, comment='小标题')
+    second_title = Column(String(255), nullable=True, comment='小标题')
     time = Column(DateTime, nullable=False, comment='活动时间')
     img_url = Column(String(255), nullable=False, comment='活动图片地址')
     resize_img_url = Column(String(255), nullable=False, comment='重建大小图片地址')
     detail_page_id = Column(Integer, nullable=False, comment='详情页id')
-    detail_page_url = Column(String(255), nullable=True, comment='比赛名称')
+    detail_page_url = Column(String(255), nullable=True, comment='详情页url')
+    type = Column(Integer, nullable=False, default=0, comment='活动类型')
 
 
 # 获奖情况表
