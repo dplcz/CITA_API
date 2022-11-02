@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import BigInteger, Column, Float, Integer, String, Text, DateTime, ForeignKey, Enum, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import declared_attr
@@ -8,7 +10,7 @@ Base = declarative_base()
 # print(__name__)
 
 class MyBaseModel(object):
-    operation_time = Column(DateTime, nullable=False, comment='操作时间')
+    operation_time = Column(DateTime, nullable=False, comment='操作时间', default=datetime.now())
 
     @declared_attr
     def operation_user(self):
@@ -46,7 +48,7 @@ class ActivityModel(Base, MyBaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     first_title = Column(String(255), nullable=False, comment='大标题')
-    second_title = Column(String(255), nullable=True, comment='小标题')
+    second_title = Column(String(255), nullable=False, comment='小标题')
     time = Column(DateTime, nullable=False, comment='活动时间')
     img_url = Column(String(255), nullable=False, comment='活动图片地址')
     resize_img_url = Column(String(255), nullable=False, comment='重建大小图片地址')
