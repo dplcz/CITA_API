@@ -2,7 +2,7 @@ import enum
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, Query, Response, Cookie, Header, Body
-from sqlalchemy import select, desc, or_
+from sqlalchemy import select, desc, or_, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import count
 
@@ -21,6 +21,12 @@ TYPE_LIST = [TeacherModel, AwardModel, ProjectModel, ActivityModel]
 
 class ModelType(str, enum.Enum):
     teacher = 'teacher'
+    award = 'award'
+    project = 'project'
+    activity = 'activity'
+
+
+class DeleteType(str, enum.Enum):
     award = 'award'
     project = 'project'
     activity = 'activity'
@@ -158,5 +164,26 @@ async def insert(insert_type: ModelType, token: str = Cookie(...), data: dict = 
             return Response(status_code=201, content='success')
         except ValueError:
             return Response(status_code=404, content='字段错误！')
+    else:
+        return Response(status_code=401, content='登录过期，请重新登录')
+
+
+@manageRouter.delete('/delete/{delete_type}')
+async def delete_data(delete_type: DeleteType, token: str = Cookie(...), del_id: int = Query(...),
+                      dbs: AsyncSession = Depends(db_session)):
+    judge_res = judge_token(token)
+    if judge_res is not None:
+        delete_model = TYPE_DICT[delete_type]
+        operation_user = judge_res['id']
+
+        temp = await dbs.execute(delete(delete_model).where(delete_model.id == del_id))
+
+        if temp.rowcount >= 1:
+            await dbs.commit()
+            return Response(status_code=200)
+        else:
+            return Response(status_code=404)
+        pass
+
     else:
         return Response(status_code=401, content='登录过期，请重新登录')
