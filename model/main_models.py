@@ -36,6 +36,7 @@ class OperationModel(Base, MyBaseModel):
     id = Column(Integer, primary_key=True, autoincrement=True)
     op_type = Column(Enum('insert', 'delete', 'update'), nullable=False, comment='操作类型')
     op_sql = Column(Text, nullable=False, comment='操作sql')
+    op_value = Column(Text, nullable=True, comment='插入value')
 
 
 # 指导老师信息数据表

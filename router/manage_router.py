@@ -11,7 +11,7 @@ from model.main_models import *
 from model.literal_model import literalquery
 
 from utils.async_util import db_session
-from utils.get_data_util import get_dict_result, solve_sql_data
+from utils.get_data_util import get_dict_result, get_query_sql
 from utils.token_util import judge_token, create_token
 
 manageRouter = APIRouter(tags=['管理页面API接口路由'])
@@ -160,13 +160,17 @@ async def insert_data(insert_type: ModelType, token: str = Cookie(...), data: di
         data_model = TYPE_DICT[insert_type]
         operation_user = judge_res['id']
         data['operation_user'] = operation_user
+        data['operation_time'] = datetime.now()
         try:
             temp_model = data_model(**data)
-            query = insert(data_model).values(data)
 
             # 插入操作记录表
-            sql = literalquery(query)
-            op_model = OperationModel(**{'op_type': 'insert', 'op_sql': sql, 'operation_user': operation_user})
+
+            query = insert(data_model).values(data)
+            # sql = literalquery(query)
+
+            op_model = OperationModel(
+                **{'op_type': 'insert', 'op_sql': str(query), 'op_value': str(data), 'operation_user': operation_user})
             # dbs.add(temp_model)
             temp = await dbs.execute(query)
             if temp.rowcount >= 1:
@@ -239,8 +243,9 @@ async def update_data(update_type: ModelType, token: str = Cookie(...), act_id: 
         # data = solve_sql_data(data)
         query = update(update_model).where(update_model.id == act_id).values(data)
 
-        sql = literalquery(query)
-        op_model = OperationModel(**{'op_type': 'update', 'op_sql': sql, 'operation_user': operation_user})
+        # sql = literalquery(query)
+        op_model = OperationModel(
+            **{'op_type': 'update', 'op_sql': str(query), 'op_value': str(data), 'operation_user': operation_user})
         temp = await dbs.execute(query)
         if temp.rowcount >= 1:
             dbs.add(op_model)

@@ -1,11 +1,12 @@
 from sqlalchemy.engine.default import DefaultDialect
-from sqlalchemy.sql.sqltypes import String, DateTime, NullType
+from sqlalchemy.sql.sqltypes import String, DateTime, NullType, Boolean, Enum
 
 # python2/3 compatible.
 PY3 = str
 text = str
 int_type = int
 str_type = str
+bool_type = bool
 
 
 class StringLiteral(String):
@@ -22,6 +23,8 @@ class StringLiteral(String):
             result = super_processor(value)
             if isinstance(result, bytes):
                 result = result.decode(dialect.encoding)
+            if isinstance(result, bool_type):
+                result = text(result)
             return result
 
         return process
@@ -35,6 +38,8 @@ class LiteralDialect(DefaultDialect):
         DateTime: StringLiteral,
         # don't format py2 long integers to NULL
         NullType: StringLiteral,
+        Boolean: StringLiteral,
+        Enum: StringLiteral
     }
 
 
@@ -43,7 +48,4 @@ def literalquery(statement):
     import sqlalchemy.orm
     if isinstance(statement, sqlalchemy.orm.Query):
         statement = statement.statement
-    return statement.compile(
-        dialect=LiteralDialect(),
-        compile_kwargs={'literal_binds': True},
-    ).string
+    return statement.compile(dialect=LiteralDialect(), compile_kwargs={'literal_binds': True}, ).string
