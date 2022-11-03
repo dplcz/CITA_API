@@ -17,8 +17,9 @@ from utils.token_util import judge_token, create_token
 manageRouter = APIRouter(tags=['管理页面API接口路由'])
 
 # 名称对应数据表
-TYPE_DICT = {'teacher': TeacherModel, 'award': AwardModel, 'project': ProjectModel, 'activity': ActivityModel}
-TYPE_LIST = [TeacherModel, AwardModel, ProjectModel, ActivityModel]
+TYPE_DICT = {'teacher': TeacherModel, 'award': AwardModel, 'project': ProjectModel, 'activity': ActivityModel,
+             'student': PartnerModel}
+TYPE_LIST = [TeacherModel, AwardModel, ProjectModel, ActivityModel, PartnerModel]
 
 
 class ModelType(str, enum.Enum):
@@ -26,12 +27,14 @@ class ModelType(str, enum.Enum):
     award = 'award'
     project = 'project'
     activity = 'activity'
+    student = 'student'
 
 
 class DeleteType(str, enum.Enum):
     award = 'award'
     project = 'project'
     activity = 'activity'
+    student = 'student'
 
 
 @manageRouter.post('/login', tags=['实现登录和token更新接口'])
@@ -133,6 +136,10 @@ async def search_activity(search_type: ModelType, token: str = Cookie(...), page
         elif data_model is TeacherModel:
             rule = or_(
                 *[TeacherModel.name.like(word), TeacherModel.description.like(word), TeacherModel.position.like(word)])
+        elif data_model is PartnerModel:
+            rule = or_(
+                *[PartnerModel.name.like(word), PartnerModel.department.like(word), PartnerModel.number.like(word),
+                  PartnerModel.position.like(word), PartnerModel.phone.like(word), PartnerModel.year.like(word)])
         else:
             return Response(status_code=404, content='该模型表不支持查询')
         fetch_temp = await dbs.execute(select(data_model).slice((page - 1) * 10, page * 10).filter(rule))
