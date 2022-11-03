@@ -168,9 +168,17 @@ async def insert(insert_type: ModelType, token: str = Cookie(...), data: dict = 
         return Response(status_code=401, content='登录过期，请重新登录')
 
 
-@manageRouter.delete('/delete/{delete_type}')
+@manageRouter.delete('/delete/{delete_type}', tags=['通过接口删除数据'])
 async def delete_data(delete_type: DeleteType, token: str = Cookie(...), del_id: int = Query(...),
                       dbs: AsyncSession = Depends(db_session)):
+    """
+    删除数据
+    :param delete_type: 删除数据表
+    :param token: 用户验证
+    :param del_id: id
+    :param dbs: 异步数据库连接
+    :return:
+    """
     judge_res = judge_token(token)
     if judge_res is not None:
         delete_model = TYPE_DICT[delete_type]
@@ -188,10 +196,20 @@ async def delete_data(delete_type: DeleteType, token: str = Cookie(...), del_id:
         return Response(status_code=401, content='登录过期，请重新登录')
 
 
-@manageRouter.post('/update/{update_type}')
+@manageRouter.post('/update/{update_type}', tags=['通过接口修改数据'])
 async def update_data(update_type: ModelType, token: str = Cookie(...), act_id: int = Query(...),
                       data: dict = Body(...),
                       dbs: AsyncSession = Depends(db_session)):
+    """
+    修改数据
+    :param update_type:
+    :param token:
+    :param act_id:
+    :param data:
+    :param dbs:
+    :return:
+    """
+
     judge_res = judge_token(token)
     if judge_res is not None:
         update_model = TYPE_DICT[update_type]
