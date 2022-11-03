@@ -14,7 +14,7 @@ class MyBaseModel(object):
 
     @declared_attr
     def operation_user(self):
-        return Column(Integer, ForeignKey('CITA_administrator.id'), comment='操作管理员')
+        return Column(Integer, ForeignKey('CITA_administrator.id'), nullable=False, comment='操作管理员')
 
 
 # 管理员数据表
@@ -29,6 +29,7 @@ class AdminModel(Base):
     latest_login_time = Column(DateTime, nullable=False)
 
 
+# 操作记录数据表
 class OperationModel(Base, MyBaseModel):
     __tablename__ = 'CITA_operation'
     __table_args__ = {'extend_existing': True}
@@ -84,6 +85,7 @@ class AwardModel(Base, MyBaseModel):
     proved_img_or_url = Column(String(255), nullable=True, comment='证明图片或文件')
 
 
+# 项目记录表
 class ProjectModel(Base, MyBaseModel):
     __tablename__ = 'CITA_project'
     __table_args__ = {'extend_existing': True}
@@ -96,3 +98,19 @@ class ProjectModel(Base, MyBaseModel):
 
     participant = Column(String(255), nullable=True, comment='参与者，可为空')
     time = Column(DateTime, nullable=False, comment='创建时间')
+
+
+# 人员信息表
+class PartnerModel(Base, MyBaseModel):
+    __tablename__ = 'CITA_partner'
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    number = Column(String(20), nullable=False, comment='学号')
+    name = Column(String(50), nullable=False, comment='姓名')
+    department = Column(Enum('项目部', '竞赛部', '宣传部', '组织部', '其他'), nullable=False, comment='部门')
+    sex = Column(Enum('男', '女'), nullable=False, comment='性别')
+    class_ = Column(String(50), name='class', nullable=False, comment='班级')
+    phone = Column(String(20), nullable=True, comment='电话号码')
+    position = Column(Enum('主席团', '部长团', '干事'), nullable=False, comment='职务', index=True)
+    year = Column(Integer, nullable=False, comment='任期')
