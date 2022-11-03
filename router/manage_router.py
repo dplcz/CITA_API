@@ -2,7 +2,7 @@ import enum
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, Query, Response, Cookie, Header, Body
-from sqlalchemy import select, desc, or_, delete
+from sqlalchemy import select, desc, or_, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import count
 
@@ -183,7 +183,24 @@ async def delete_data(delete_type: DeleteType, token: str = Cookie(...), del_id:
             return Response(status_code=200)
         else:
             return Response(status_code=404)
-        pass
 
+    else:
+        return Response(status_code=401, content='登录过期，请重新登录')
+
+
+@manageRouter.post('/update/{update_type}')
+async def update_data(update_type: ModelType, token: str = Cookie(...), act_id: int = Query(...),
+                      data: dict = Body(...),
+                      dbs: AsyncSession = Depends(db_session)):
+    judge_res = judge_token(token)
+    if judge_res is not None:
+        update_model = TYPE_DICT[update_type]
+        operation_user = judge_res['id']
+        temp = await dbs.execute(update(update_model).where(update_model.id == act_id).values(data))
+        if temp.rowcount >= 1:
+            await dbs.commit()
+            return Response(status_code=200)
+        else:
+            return Response(status_code=404)
     else:
         return Response(status_code=401, content='登录过期，请重新登录')
