@@ -2,14 +2,16 @@ import enum
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, Query, Response, Cookie, Header, Body
-from sqlalchemy import select, desc, or_, delete, update
+from sqlalchemy import select, desc, or_, delete, update, literal_column, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import count
+from sqlalchemy.dialects import mysql
 
 from model.main_models import *
+from model.literal_model import literalquery
 
 from utils.async_util import db_session
-from utils.get_data_util import get_dict_result
+from utils.get_data_util import get_dict_result, solve_sql_data
 from utils.token_util import judge_token, create_token
 
 manageRouter = APIRouter(tags=['管理页面API接口路由'])
@@ -143,8 +145,8 @@ async def search_activity(search_type: ModelType, token: str = Cookie(...), page
 
 
 @manageRouter.post('/insert/{insert_type}', tags=['通过接口插入数据'])
-async def insert(insert_type: ModelType, token: str = Cookie(...), data: dict = Body(...),
-                 dbs: AsyncSession = Depends(db_session)):
+async def insert_data(insert_type: ModelType, token: str = Cookie(...), data: dict = Body(...),
+                      dbs: AsyncSession = Depends(db_session)):
     """
     插入数据
     :param insert_type: 插入数据表
@@ -156,12 +158,23 @@ async def insert(insert_type: ModelType, token: str = Cookie(...), data: dict = 
     judge_res = judge_token(token)
     if judge_res is not None:
         data_model = TYPE_DICT[insert_type]
-        data['operation_user'] = judge_res['id']
+        operation_user = judge_res['id']
+        data['operation_user'] = operation_user
         try:
             temp_model = data_model(**data)
-            dbs.add(temp_model)
-            await dbs.commit()
-            return Response(status_code=201, content='success')
+            query = insert(data_model).values(data)
+
+            # 插入操作记录表
+            sql = literalquery(query)
+            op_model = OperationModel(**{'op_type': 'insert', 'op_sql': sql, 'operation_user': operation_user})
+            # dbs.add(temp_model)
+            temp = await dbs.execute(query)
+            if temp.rowcount >= 1:
+                dbs.add(op_model)
+                await dbs.commit()
+                return Response(status_code=201, content='success')
+            else:
+                return Response(status_code=404, content='添加失败')
         except ValueError:
             return Response(status_code=404, content='字段错误！')
     else:
@@ -184,9 +197,15 @@ async def delete_data(delete_type: DeleteType, token: str = Cookie(...), del_id:
         delete_model = TYPE_DICT[delete_type]
         operation_user = judge_res['id']
 
-        temp = await dbs.execute(delete(delete_model).where(delete_model.id == del_id))
+        query = delete(delete_model).where(delete_model.id == del_id)
+
+        # 插入操作记录表
+        sql = literalquery(query)
+        op_model = OperationModel(**{'op_type': 'delete', 'op_sql': sql, 'operation_user': operation_user})
+        temp = await dbs.execute(query)
 
         if temp.rowcount >= 1:
+            dbs.add(op_model)
             await dbs.commit()
             return Response(status_code=200)
         else:
@@ -214,8 +233,17 @@ async def update_data(update_type: ModelType, token: str = Cookie(...), act_id: 
     if judge_res is not None:
         update_model = TYPE_DICT[update_type]
         operation_user = judge_res['id']
-        temp = await dbs.execute(update(update_model).where(update_model.id == act_id).values(data))
+
+        data['operation_user'] = operation_user
+        data['operation_time'] = datetime.now()
+        # data = solve_sql_data(data)
+        query = update(update_model).where(update_model.id == act_id).values(data)
+
+        sql = literalquery(query)
+        op_model = OperationModel(**{'op_type': 'update', 'op_sql': sql, 'operation_user': operation_user})
+        temp = await dbs.execute(query)
         if temp.rowcount >= 1:
+            dbs.add(op_model)
             await dbs.commit()
             return Response(status_code=200)
         else:

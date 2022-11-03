@@ -1,3 +1,7 @@
+from sqlalchemy import literal_column, DateTime
+from datetime import datetime
+
+
 def get_dict_result(**kwargs):
     try:
         data = kwargs['data']
@@ -22,3 +26,10 @@ def get_dict_result(**kwargs):
         return result
     except Exception:
         return {'code': 1}
+
+
+def solve_sql_data(data):
+    if data.get('time', None) is not None:
+        data['time'] = literal_column(data['time'], type_=DateTime)
+    data['operation_time'] = literal_column(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), type_=DateTime)
+    return data

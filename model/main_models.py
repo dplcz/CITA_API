@@ -29,6 +29,15 @@ class AdminModel(Base):
     latest_login_time = Column(DateTime, nullable=False)
 
 
+class OperationModel(Base, MyBaseModel):
+    __tablename__ = 'CITA_operation'
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    op_type = Column(Enum('insert', 'delete', 'update'), nullable=False, comment='操作类型')
+    op_sql = Column(Text, nullable=False, comment='操作sql')
+
+
 # 指导老师信息数据表
 class TeacherModel(Base, MyBaseModel):
     __tablename__ = 'CITA_teacher'
@@ -46,7 +55,7 @@ class ActivityModel(Base, MyBaseModel):
     __tablename__ = 'CITA_activity'
     __table_args__ = {'extend_existing': True}
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, comment='序列号')
     first_title = Column(String(255), nullable=False, comment='大标题')
     second_title = Column(String(255), nullable=False, comment='小标题')
     time = Column(DateTime, nullable=False, comment='活动时间')
