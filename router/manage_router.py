@@ -52,6 +52,8 @@ async def login(token: str = Cookie(None), origin: str = Header(...), username: 
                 response.set_cookie('token', create_token(username, result['data'][0]['id']), expires=3600,
                                     samesite=None)
                 return response
+            else:
+                return Response(status_code=401)
     elif token is not None:
         judge_res = judge_token(token)
         if judge_res is not None:
