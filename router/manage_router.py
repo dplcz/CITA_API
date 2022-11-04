@@ -74,7 +74,13 @@ async def login(token: str = Cookie(None), origin: str = Header(...), username: 
                 response.init_headers({'Access-control-Allow-Origin': origin})
                 response.set_cookie('token', create_token(username, result['data'][0]['id']), expires=3600,
                                     samesite=None)
-                return response
+                sql = update(AdminModel).where(result['data'][0]['id'] == AdminModel.id).values(
+                    {'latest_login_time': datetime.now()})
+                temp = await dbs.execute(sql)
+                if temp.rowcount >= 1:
+                    return response
+                else:
+                    return Response(status_code=400)
             else:
                 return Response(status_code=401)
     elif token is not None:
@@ -279,6 +285,17 @@ async def update_data(update_type: ModelType, token: str = Cookie(...), act_id: 
 @manageRouter.post('/upload-img/{upload_type}', tags=['上传图片到腾讯云cos'])
 async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_length: int = Header(..., lt=2_100_000),
                      file: UploadFile = File(...), act_id: int = Form(...), resize: str = Form(None)):
+    """
+    上传图片
+    :param upload_type: 图片分类
+    :param token: 用户验证
+    :param content_length: 文件大小
+    :param file: 文件
+    :param act_id: 活动id
+    :param resize: 重置大小
+    :return:
+    """
+
     judge_res = judge_token(token)
     if judge_res is not None:
         result = {}

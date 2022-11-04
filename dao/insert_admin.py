@@ -12,7 +12,7 @@ if __name__ == '__main__':
                                                 config['mysqldb']['database']), echo=True)
     # session = sessionmaker(bind=engine)
     db_session = Session(engine)
-    db_session.add(AdminModel(name='admin', password='dplcz666', created_time=datetime.now(),
-                              latest_login_time=datetime.now()))
+    # db_session.add(AdminModel(name='admin', password='dplcz666', created_time=datetime.now(),
+    #                           latest_login_time=datetime.now()))
     db_session.commit()
     db_session.close()
