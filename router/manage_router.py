@@ -78,6 +78,7 @@ async def login(token: str = Cookie(None), origin: str = Header(...), username: 
                     {'latest_login_time': datetime.now()})
                 temp = await dbs.execute(sql)
                 if temp.rowcount >= 1:
+                    await dbs.commit()
                     return response
                 else:
                     return Response(status_code=400)
