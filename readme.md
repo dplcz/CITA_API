@@ -9,6 +9,7 @@ fastapi为异步web框架，使用sqlalchemy支持异步连接数据库
 ```
 python >= 3.7
 
+pip3 install -U cos-python-sdk-v5
 pip3 install fastapi >= 0.75.0
 pip3 install PyJWT >= 2.4.0
 pip3 install sqlalchemy >= 1.4.39
@@ -31,6 +32,13 @@ port_bind = 9801
 # 生成token的key
 SECRET_KEY = 'zmxjsl'
 
+
+[upload.conf]
+secret_id = 腾讯云COS secret_id
+secret_key = 腾讯云COS secret_key
+region = 腾讯云COSregion region
+token = 腾讯云COS token
+bucket = 腾讯云COS bucket
 
 [mysqldb]
 # 数据库ip
