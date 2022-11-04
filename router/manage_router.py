@@ -284,7 +284,7 @@ async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_len
         result = {}
         file_content = await file.read()
         file_type = file.content_type.split('/')[-1]
-        if resize is not None:
+        if resize is not None and resize != 'null':
             try:
                 width, height = re.findall(SIZE_PATTERN, resize)[0]
                 width = int(width)
@@ -296,7 +296,7 @@ async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_len
                                                                                       resize_file_name)
                 else:
                     return Response(status_code=400, content='resize上传失败')
-            except ValueError:
+            except (ValueError, IndexError):
                 return Response(status_code=404, content='resize 格式错误')
         file_name = '{}_{}.{}'.format(upload_type, act_id, file_type)
         if upload_file(file_content, file_name):
