@@ -1,7 +1,8 @@
 import enum
+import re
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Form, Query, Response, Cookie, Header, Body
+from fastapi import APIRouter, Depends, Form, Query, Response, Cookie, Header, Body, UploadFile, File
 from sqlalchemy import select, desc, or_, delete, update, literal_column, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import count
@@ -13,6 +14,9 @@ from model.literal_model import literalquery
 from utils.async_util import db_session
 from utils.get_data_util import get_dict_result, get_query_sql
 from utils.token_util import judge_token, create_token
+from utils.upload_img_util import upload_file, resize_img
+
+from config.config import config
 
 manageRouter = APIRouter(tags=['管理页面API接口路由'])
 
@@ -20,6 +24,8 @@ manageRouter = APIRouter(tags=['管理页面API接口路由'])
 TYPE_DICT = {'teacher': TeacherModel, 'award': AwardModel, 'project': ProjectModel, 'activity': ActivityModel,
              'student': PartnerModel}
 TYPE_LIST = [TeacherModel, AwardModel, ProjectModel, ActivityModel, PartnerModel]
+
+SIZE_PATTERN = re.compile('(\d+)x(\d+)')
 
 
 class ModelType(str, enum.Enum):
@@ -35,6 +41,12 @@ class DeleteType(str, enum.Enum):
     project = 'project'
     activity = 'activity'
     student = 'student'
+
+
+class ImgType(str, enum.Enum):
+    activity = 'activity'
+    project = 'project'
+    other = 'other'
 
 
 @manageRouter.post('/login', tags=['实现登录和token更新接口'])
@@ -262,3 +274,35 @@ async def update_data(update_type: ModelType, token: str = Cookie(...), act_id: 
             return Response(status_code=404)
     else:
         return Response(status_code=401, content='登录过期，请重新登录')
+
+
+@manageRouter.post('/upload-img/{upload_type}', tags=['上传图片到腾讯云cos'])
+async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_length: int = Header(..., lt=2_100_000),
+                     file: UploadFile = File(...), act_id: int = Form(...), resize: str = Form(None)):
+    judge_res = judge_token(token)
+    if judge_res is not None:
+        result = {}
+        file_content = await file.read()
+        file_type = file.content_type.split('/')[-1]
+        if resize is not None:
+            try:
+                width, height = re.findall(SIZE_PATTERN, resize)[0]
+                width = int(width)
+                height = int(height)
+                resize_file_name = '{}_{}_resize.{}'.format(upload_type, act_id, file_type)
+                if resize_img(file_content, width, height, resize_file_name, file_type):
+                    result['resize_url'] = 'https://{}.cos.{}.myqcloud.com/{}'.format(config['upload.conf']['bucket'],
+                                                                                      config['upload.conf']['region'],
+                                                                                      resize_file_name)
+                else:
+                    return Response(status_code=400, content='resize上传失败')
+            except ValueError:
+                return Response(status_code=404, content='resize 格式错误')
+        file_name = '{}_{}.{}'.format(upload_type, act_id, file_type)
+        if upload_file(file_content, file_name):
+            result['url'] = 'https://{}.cos.{}.myqcloud.com/{}'.format(config['upload.conf']['bucket'],
+                                                                       config['upload.conf']['region'],
+                                                                       file_name)
+            return result
+        else:
+            return Response(status_code=400, content='上传失败')
