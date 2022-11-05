@@ -4,6 +4,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, Query, Response, Cookie, Header, Body, UploadFile, File
 from sqlalchemy import select, desc, or_, delete, update, literal_column, insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import count
 from sqlalchemy.dialects import mysql
@@ -66,7 +67,7 @@ async def login(token: str = Cookie(None), origin: str = Header(...), username: 
         fetch_temp = await dbs.execute(select(AdminModel.password, AdminModel.id).where(AdminModel.name == username))
         result = get_dict_result(data=fetch_temp)
         if len(result['data']) == 0:
-            return Response(status_code=401, content='错误的密码或账户')
+            return Response(status_code=401, content='错误的密码或账户'.encode('utf-8'))
         else:
 
             if result['data'][0]['password'] == password:
@@ -94,7 +95,7 @@ async def login(token: str = Cookie(None), origin: str = Header(...), username: 
                                 samesite=None)
             return response
         else:
-            return Response(status_code=401, content='登录过期，请重新登录')
+            return Response(status_code=401, content='登录过期，请重新登录'.encode('utf-8'))
     else:
         return Response(status_code=401)
 
@@ -119,7 +120,7 @@ async def list_activity(select_type: ModelType, token: str = Cookie(...), page: 
         result = get_dict_result(data=fetch_temp, count=count_temp, model=data_model.__name__)
         return result
     else:
-        return Response(status_code=401, content='登录过期，请重新登录')
+        return Response(status_code=401, content='登录过期，请重新登录'.encode('utf-8'))
 
 
 @manageRouter.get('/search/{search_type}', tags=['通过接口名称模糊搜索数据'])
@@ -160,14 +161,14 @@ async def search_activity(search_type: ModelType, token: str = Cookie(...), page
                 *[PartnerModel.name.like(word), PartnerModel.department.like(word), PartnerModel.number.like(word),
                   PartnerModel.position.like(word), PartnerModel.phone.like(word), PartnerModel.year.like(word)])
         else:
-            return Response(status_code=404, content='该模型表不支持查询')
+            return Response(status_code=404, content='该模型表不支持查询'.encode('utf-8'))
         fetch_temp = await dbs.execute(select(data_model).slice((page - 1) * 10, page * 10).filter(rule))
         count_temp = await dbs.execute(select(count(data_model.id)).filter(rule))
         result = get_dict_result(data=fetch_temp, count=count_temp, model=data_model.__name__)
         return result
 
     else:
-        return Response(status_code=401, content='登录过期，请重新登录')
+        return Response(status_code=401, content='登录过期，请重新登录'.encode('utf-8'))
 
 
 @manageRouter.post('/insert/{insert_type}', tags=['通过接口插入数据'])
@@ -204,11 +205,13 @@ async def insert_data(insert_type: ModelType, token: str = Cookie(...), data: di
                 await dbs.commit()
                 return Response(status_code=201, content='success')
             else:
-                return Response(status_code=404, content='添加失败')
+                return Response(status_code=404, content='添加失败'.encode('utf-8'))
         except ValueError:
-            return Response(status_code=404, content='字段错误！')
+            return Response(status_code=404, content='字段错误！'.encode('utf-8'))
+        except IntegrityError:
+            return Response(status_code=404, content='主键重复！'.encode('utf-8'))
     else:
-        return Response(status_code=401, content='登录过期，请重新登录')
+        return Response(status_code=401, content='登录过期，请重新登录'.encode('utf-8'))
 
 
 @manageRouter.delete('/delete/{delete_type}', tags=['通过接口删除数据'])
@@ -242,7 +245,7 @@ async def delete_data(delete_type: DeleteType, token: str = Cookie(...), del_id:
             return Response(status_code=404)
 
     else:
-        return Response(status_code=401, content='登录过期，请重新登录')
+        return Response(status_code=401, content='登录过期，请重新登录'.encode('utf-8'))
 
 
 @manageRouter.post('/update/{update_type}', tags=['通过接口修改数据'])
@@ -280,7 +283,7 @@ async def update_data(update_type: ModelType, token: str = Cookie(...), act_id: 
         else:
             return Response(status_code=404)
     else:
-        return Response(status_code=401, content='登录过期，请重新登录')
+        return Response(status_code=401, content='登录过期，请重新登录'.encode('utf-8'))
 
 
 @manageRouter.post('/upload-img/{upload_type}', tags=['上传图片到腾讯云cos'])
@@ -313,9 +316,9 @@ async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_len
                                                                                       config['upload.conf']['region'],
                                                                                       resize_file_name)
                 else:
-                    return Response(status_code=400, content='resize上传失败')
+                    return Response(status_code=400, content='resize上传失败'.encode('utf-8'))
             except (ValueError, IndexError):
-                return Response(status_code=404, content='resize 格式错误')
+                return Response(status_code=404, content='resize 格式错误'.encode('utf-8'))
         file_name = '{}_{}.{}'.format(upload_type, act_id, file_type)
         if upload_file(file_content, file_name):
             result['url'] = 'https://{}.cos.{}.myqcloud.com/{}'.format(config['upload.conf']['bucket'],
@@ -323,4 +326,4 @@ async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_len
                                                                        file_name)
             return result
         else:
-            return Response(status_code=400, content='上传失败')
+            return Response(status_code=400, content='上传失败'.encode('utf-8'))
