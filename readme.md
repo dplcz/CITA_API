@@ -9,7 +9,9 @@ fastapi为异步web框架，使用sqlalchemy支持异步连接数据库
 ```
 python >= 3.7
 
+# 使用腾讯云COS
 pip3 install -U cos-python-sdk-v5
+
 pip3 install fastapi >= 0.75.0
 pip3 install PyJWT >= 2.4.0
 pip3 install sqlalchemy >= 1.4.39

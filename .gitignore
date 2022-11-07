@@ -28,6 +28,7 @@ MANIFEST
 
 *.pyc
 *.ini
+conf.*
 *_temp.csv
 *.csv
 *.xlsx
