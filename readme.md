@@ -24,35 +24,41 @@ pip3 install gunicorn >= 20.1.0
 ```
 
 ### Usage
-配置文件config/conf.ini
+配置文件config/conf.json
 ```
-[web.conf]
-# 绑定ip
-ip_bind = 0.0.0.0
-# 绑定端口
-port_bind = 9801
-# 生成token的key
-SECRET_KEY = 'zmxjsl'
-
-
-[upload.conf]
-secret_id = 腾讯云COS secret_id
-secret_key = 腾讯云COS secret_key
-region = 腾讯云COSregion region
-token = 腾讯云COS token
-bucket = 腾讯云COS bucket
-
-[mysqldb]
-# 数据库ip
-sql_host = 127.0.0.1
-# 数据库端口
-sql_port = 3306
-# 数据库用户名
-sql_user = root
-# 数据库用户名密码
-sql_pass = 123456
-# 数据库名称
-database = CITA
+{
+  "description": "配置文件",
+  "version": "1.0.0",
+  "author": "dplcz",
+  "conf": {
+    "web": {
+      "ip": "0.0.0.0",
+      "port": 9801,
+      "SECRET_KEY": "asdsad"
+    },
+    "upload": {
+      "type": "lsky",
+      "cos": {
+        "secret_id": "secret_id",
+        "secret_key": "secret_key",
+        "region": "region",
+        "token": null,
+        "bucket": "bucket"
+      },
+      "lsky": {
+        "host": "http://host/api/v1/upload",
+        "authorization": "111"
+      }
+    },
+    "mysqldb": {
+      "host": "127.0.0.1",
+      "port": 3306,
+      "user": "11111",
+      "pass": "12345",
+      "database": "CITA"
+    }
+  }
+}
 ```
 启动服务
 ```
