@@ -46,7 +46,7 @@ pip3 install gunicorn >= 20.1.0
         "bucket": "bucket"
       },
       "lsky": {
-        "host": "http://host/api/v1/upload",
+        "host": "http://host/api/v1/",
         "authorization": "111"
       }
     },
