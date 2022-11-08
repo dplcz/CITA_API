@@ -15,7 +15,7 @@ from model.literal_model import literalquery
 from utils.async_util import db_session
 from utils.get_data_util import get_dict_result, get_query_sql
 from utils.token_util import judge_token, create_token
-from utils.upload_img_util import upload_file, resize_img
+from utils.upload_img_util import ImageUploader
 
 from config.config import config
 
@@ -27,6 +27,8 @@ TYPE_DICT = {'teacher': TeacherModel, 'award': AwardModel, 'project': ProjectMod
 TYPE_LIST = [TeacherModel, AwardModel, ProjectModel, ActivityModel, PartnerModel]
 
 SIZE_PATTERN = re.compile('(\d+)x(\d+)')
+
+uploader = ImageUploader()
 
 
 class ModelType(str, enum.Enum):
@@ -311,19 +313,28 @@ async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_len
                 width = int(width)
                 height = int(height)
                 resize_file_name = '{}_{}_resize.{}'.format(upload_type, act_id, file_type)
-                if resize_img(file_content, width, height, resize_file_name, file_type):
-                    result['resize_url'] = 'https://{}.cos.{}.myqcloud.com/{}'.format(config['upload.conf']['bucket'],
-                                                                                      config['upload.conf']['region'],
-                                                                                      resize_file_name)
+                res = uploader.resize_img(file_content, width, height, resize_file_name, file_type)
+                if res:
+                    if config['conf']['upload']['type'] == 'cos':
+                        result['resize_url'] = 'https://{}.cos.{}.myqcloud.com/{}'.format(
+                            config['conf']['upload']['cos']['bucket'],
+                            config['conf']['upload']['cos']['region'],
+                            resize_file_name)
+                    elif config['conf']['upload']['type'] == 'lsky':
+                        result['resize_url'] = res
                 else:
                     return Response(status_code=400, content='resize上传失败'.encode('utf-8'))
             except (ValueError, IndexError):
                 return Response(status_code=404, content='resize 格式错误'.encode('utf-8'))
         file_name = '{}_{}.{}'.format(upload_type, act_id, file_type)
-        if upload_file(file_content, file_name):
-            result['url'] = 'https://{}.cos.{}.myqcloud.com/{}'.format(config['upload.conf']['bucket'],
-                                                                       config['upload.conf']['region'],
-                                                                       file_name)
+        res = uploader.upload_file(file_content, file_name)
+        if res:
+            if config['conf']['upload']['type'] == 'cos':
+                result['url'] = 'https://{}.cos.{}.myqcloud.com/{}'.format(config['conf']['upload']['cos']['bucket'],
+                                                                           config['conf']['upload']['cos']['region'],
+                                                                           file_name)
+            elif config['conf']['upload']['type'] == 'lsky':
+                result['url'] = res
             return result
         else:
             return Response(status_code=400, content='上传失败'.encode('utf-8'))
