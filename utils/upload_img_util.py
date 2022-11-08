@@ -40,8 +40,27 @@ class ImageUploader:
             try:
                 headers = {'Accept': 'application/json',
                            'Authorization': config['conf']['upload'][self.type]['authorization']}
-                response = httpx.post(config['conf']['upload'][self.type]['host'], headers=headers,
+                response = httpx.post(config['conf']['upload'][self.type]['host'] + 'upload', headers=headers,
                                       files={'file': (filename, file_content)}).json()
-                return response['data']['links']['url']
+                return response['data']['links']['url'], response['data']['key']
             except Exception:
                 return None
+
+    def delete_file(self, keys: list) -> bool:
+        if self.type == 'lsky':
+            keys.remove('')
+            for key in keys:
+                try:
+                    headers = {'Accept': 'application/json',
+                               'Authorization': config['conf']['upload'][self.type]['authorization']}
+                    response = httpx.delete(config['conf']['upload'][self.type]['host'] + 'images/{}'.format(key),
+                                            headers=headers).json()
+                    if response['status']:
+                        continue
+                    else:
+                        return False
+                except Exception:
+                    return False
+            return True
+
+        pass

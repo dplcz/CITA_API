@@ -117,7 +117,7 @@ async def list_activity(select_type: ModelType, token: str = Cookie(...), page: 
     if judge_res is not None:
         data_model = TYPE_DICT[select_type]
         fetch_temp = await dbs.execute(
-            select(data_model).slice((page - 1) * 10, page * 10))
+            select(data_model).slice((page - 1) * 10, page * 10).order_by(desc(data_model.operation_time)))
         count_temp = await dbs.execute(count(data_model.id))
         result = get_dict_result(data=fetch_temp, count=count_temp, model=data_model.__name__)
         return result
@@ -232,6 +232,12 @@ async def delete_data(delete_type: DeleteType, token: str = Cookie(...), del_id:
         delete_model = TYPE_DICT[delete_type]
         operation_user = judge_res['id']
 
+        fetch_temp = await dbs.execute(select(delete_model.keys).where(delete_model.id == del_id))
+        keys_result = get_dict_result(data=fetch_temp)
+        if len(keys_result['data']) > 0:
+            if not uploader.delete_file(keys_result['data'][0]['keys'].split(';')):
+                return Response(status_code=404)
+
         query = delete(delete_model).where(delete_model.id == del_id)
 
         # 插入操作记录表
@@ -290,7 +296,7 @@ async def update_data(update_type: ModelType, token: str = Cookie(...), act_id: 
 
 @manageRouter.post('/upload-img/{upload_type}', tags=['上传图片'])
 async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_length: int = Header(..., lt=2_100_000),
-                     file: UploadFile = File(...), act_id: int = Form(...), replace: bool = Form(True),
+                     file: UploadFile = File(...), act_id: int = Form(...), replace: bool = Form(False),
                      resize: str = Form(None), dbs: AsyncSession = Depends(db_session)):
     """
     上传图片
@@ -320,6 +326,7 @@ async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_len
 
         file_content = await file.read()
         file_type = file.content_type.split('/')[-1]
+        keys = None
         if resize is not None and resize != 'null':
             try:
                 width, height = re.findall(SIZE_PATTERN, resize)[0]
@@ -334,7 +341,8 @@ async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_len
                             config['conf']['upload']['cos']['region'],
                             resize_file_name)
                     elif config['conf']['upload']['type'] == 'lsky':
-                        result['resize_url'] = res
+                        result['resize_url'] = res[0]
+                        keys = '{};'.format(res[1])
                 else:
                     return Response(status_code=400, content='resize上传失败'.encode('utf-8'))
             except (ValueError, IndexError):
@@ -347,9 +355,10 @@ async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_len
                                                                            config['conf']['upload']['cos']['region'],
                                                                            file_name)
             elif config['conf']['upload']['type'] == 'lsky':
-                result['url'] = res
+                result['url'] = res[0]
             if replace:
-                data = {'img_url': result.get('url'), 'resize_img_url': result.get('resize_url', None)}
+                keys = '{};'.format(res[1]) if keys is None else '{}{};'.format(keys, res[1])
+                data = {'img_url': result.get('url'), 'resize_img_url': result.get('resize_url', None), 'keys': keys}
                 query = update(upload_model).where(upload_model.id == act_id).values(data)
                 op_model = OperationModel(
                     **{'op_type': 'update', 'op_sql': str(query), 'op_value': str(data),
