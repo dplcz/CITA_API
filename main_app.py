@@ -17,5 +17,5 @@ app.include_router(indexRouter, prefix='/index', tags=['主页信息路由'])
 app.include_router(manageRouter, prefix='/man', tags=['管理页面路由'])
 
 if __name__ == '__main__':
-    uvicorn.run(app, host="{}".format(config['web.conf'].get('ip_bind', '127.0.0.1')),
-                port=int(config['web.conf'].get('port_bind', 8080)))
+    uvicorn.run(app, host="{}".format(config['conf']['web'].get('ip', '127.0.0.1')),
+                port=int(config['conf']['web'].get('port', 8080)))
