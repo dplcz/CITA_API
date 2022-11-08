@@ -288,9 +288,10 @@ async def update_data(update_type: ModelType, token: str = Cookie(...), act_id: 
         return Response(status_code=401, content='登录过期，请重新登录'.encode('utf-8'))
 
 
-@manageRouter.post('/upload-img/{upload_type}', tags=['上传图片到腾讯云cos'])
+@manageRouter.post('/upload-img/{upload_type}', tags=['上传图片'])
 async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_length: int = Header(..., lt=2_100_000),
-                     file: UploadFile = File(...), act_id: int = Form(...), resize: str = Form(None)):
+                     file: UploadFile = File(...), act_id: int = Form(...), replace: bool = Form(True),
+                     resize: str = Form(None), dbs: AsyncSession = Depends(db_session)):
     """
     上传图片
     :param upload_type: 图片分类
@@ -298,13 +299,25 @@ async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_len
     :param content_length: 文件大小
     :param file: 文件
     :param act_id: 活动id
+    :param replace: 是否替换
     :param resize: 重置大小
+    :param dbs: 异步数据库连接
     :return:
     """
 
     judge_res = judge_token(token)
     if judge_res is not None:
+        if replace:
+            operation_user = judge_res['id']
+
+            upload_model = TYPE_DICT[upload_type]
+            fetch_temp = await dbs.execute(select(upload_model).where(upload_model.id == act_id))
+            temp_res = get_dict_result(data=fetch_temp, model=upload_model.__name__)
+            if len(temp_res['data']) == 0:
+                return Response(status_code=404)
+
         result = {}
+
         file_content = await file.read()
         file_type = file.content_type.split('/')[-1]
         if resize is not None and resize != 'null':
@@ -335,6 +348,18 @@ async def upload_img(upload_type: ImgType, token: str = Cookie(...), content_len
                                                                            file_name)
             elif config['conf']['upload']['type'] == 'lsky':
                 result['url'] = res
+            if replace:
+                data = {'img_url': result.get('url'), 'resize_img_url': result.get('resize_url', None)}
+                query = update(upload_model).where(upload_model.id == act_id).values(data)
+                op_model = OperationModel(
+                    **{'op_type': 'update', 'op_sql': str(query), 'op_value': str(data),
+                       'operation_user': operation_user})
+                temp = await dbs.execute(query)
+                if temp.rowcount >= 1:
+                    dbs.add(op_model)
+                    await dbs.commit()
+                else:
+                    return Response(status_code=400, content='上传失败'.encode('utf-8'))
             return result
         else:
             return Response(status_code=400, content='上传失败'.encode('utf-8'))
