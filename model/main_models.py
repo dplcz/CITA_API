@@ -67,6 +67,8 @@ class ActivityModel(Base, MyBaseModel):
     detail_page_url = Column(String(255), nullable=True, comment='详情页url')
     type = Column(Integer, nullable=False, default=0, comment='活动类型')
 
+    keys = Column(String(255), nullable=True, comment='图片的key,用分号隔开')
+
 
 # 获奖情况表
 class AwardModel(Base, MyBaseModel):
@@ -98,6 +100,8 @@ class ProjectModel(Base, MyBaseModel):
 
     participant = Column(String(255), nullable=True, comment='参与者，可为空')
     time = Column(DateTime, nullable=False, comment='创建时间')
+
+    keys = Column(String(255), nullable=True, comment='图片的key,用分号隔开')
 
 
 # 人员信息表
