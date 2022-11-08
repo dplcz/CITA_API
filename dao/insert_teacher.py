@@ -9,9 +9,9 @@ from model.main_models import *
 
 if __name__ == '__main__':
     engine = create_engine(
-        'mysql+pymysql://{}:{}@{}:{}/{}'.format(config['mysqldb']['sql_user'], config['mysqldb']['sql_pass'],
-                                                config['mysqldb']['sql_host'], config['mysqldb']['sql_port'],
-                                                config['mysqldb']['database']), echo=True)
+        'mysql+pymysql://{}:{}@{}:{}/{}'.format(config['conf']['mysqldb']['user'], config['conf']['mysqldb']['pass'],
+                                                config['conf']['mysqldb']['host'], config['conf']['mysqldb']['port'],
+                                                config['conf']['mysqldb']['database']), echo=True)
 
     db_session = Session(engine)
     # teacher_sun = TeacherModel(name='孙威', position='阿里云大数据讲师、慧科集团高级讲师、互联网高级架构师',

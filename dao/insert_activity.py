@@ -8,9 +8,9 @@ from config.config import config
 
 if __name__ == '__main__':
     engine = create_engine(
-        'mysql+pymysql://{}:{}@{}:{}/{}'.format(config['mysqldb']['sql_user'], config['mysqldb']['sql_pass'],
-                                                config['mysqldb']['sql_host'], config['mysqldb']['sql_port'],
-                                                config['mysqldb']['database']), echo=True)
+        'mysql+pymysql://{}:{}@{}:{}/{}'.format(config['conf']['mysqldb']['user'], config['conf']['mysqldb']['pass'],
+                                                config['conf']['mysqldb']['host'], config['conf']['mysqldb']['port'],
+                                                config['conf']['mysqldb']['database']), echo=True)
     db_session = Session(engine)
     # activity_mian = ActivityModel(first_title='招新面试', second_title='欢迎来到科技创新协会',
     #                               time=datetime.datetime.strptime('2022-09-30', '%Y-%m-%d'),

@@ -9,9 +9,9 @@ import xlrd
 
 if __name__ == '__main__':
     engine = create_engine(
-        'mysql+pymysql://{}:{}@{}:{}/{}'.format(config['mysqldb']['sql_user'], config['mysqldb']['sql_pass'],
-                                                config['mysqldb']['sql_host'], config['mysqldb']['sql_port'],
-                                                config['mysqldb']['database']), echo=True)
+        'mysql+pymysql://{}:{}@{}:{}/{}'.format(config['conf']['mysqldb']['user'], config['conf']['mysqldb']['pass'],
+                                                config['conf']['mysqldb']['host'], config['conf']['mysqldb']['port'],
+                                                config['conf']['mysqldb']['database']), echo=True)
     db_session = Session(engine)
     wb = xlrd.open_workbook('../2022_partner (2).xlsx')
     sh = wb.sheet_by_name('temp_sheet')

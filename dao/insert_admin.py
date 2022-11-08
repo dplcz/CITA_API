@@ -7,9 +7,9 @@ from config.config import config
 
 if __name__ == '__main__':
     engine = create_engine(
-        'mysql+pymysql://{}:{}@{}:{}/{}'.format(config['mysqldb']['sql_user'], config['mysqldb']['sql_pass'],
-                                                config['mysqldb']['sql_host'], config['mysqldb']['sql_port'],
-                                                config['mysqldb']['database']), echo=True)
+        'mysql+pymysql://{}:{}@{}:{}/{}'.format(config['conf']['mysqldb']['user'], config['conf']['mysqldb']['pass'],
+                                                config['conf']['mysqldb']['host'], config['conf']['mysqldb']['port'],
+                                                config['conf']['mysqldb']['database']), echo=True)
     # session = sessionmaker(bind=engine)
     db_session = Session(engine)
     # db_session.add(AdminModel(name='admin', password='dplcz666', created_time=datetime.now(),
