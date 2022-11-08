@@ -3,7 +3,7 @@ from jwt.exceptions import ExpiredSignatureError, PyJWTError
 from datetime import datetime, timedelta
 from config.config import config
 
-SECRET_KEY = config['web.conf']['SECRET_KEY']
+SECRET_KEY = config['conf']['web']['SECRET_KEY']
 
 
 def judge_token(token):
