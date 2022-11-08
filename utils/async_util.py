@@ -3,11 +3,11 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from config.config import config
 
-SQLALCHEMY_DATABASE_URL = 'mysql+aiomysql://{}:{}@{}:{}/{}'.format(config['mysqldb']['sql_user'],
-                                                                   config['mysqldb']['sql_pass'],
-                                                                   config['mysqldb']['sql_host'],
-                                                                   config['mysqldb']['sql_port'],
-                                                                   config['mysqldb']['database'])
+SQLALCHEMY_DATABASE_URL = 'mysql+aiomysql://{}:{}@{}:{}/{}'.format(config['conf']['mysqldb']['user'],
+                                                                   config['conf']['mysqldb']['pass'],
+                                                                   config['conf']['mysqldb']['host'],
+                                                                   config['conf']['mysqldb']['port'],
+                                                                   config['conf']['mysqldb']['database'])
 # 创建异步连接引擎
 engine = create_async_engine(SQLALCHEMY_DATABASE_URL, encoding='utf8',
                              connect_args={'connect_timeout': 120}, pool_pre_ping=True)
