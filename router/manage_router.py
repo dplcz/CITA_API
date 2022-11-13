@@ -116,8 +116,12 @@ async def list_activity(select_type: ModelType, token: str = Cookie(...), page: 
     judge_res = judge_token(token)
     if judge_res is not None:
         data_model = TYPE_DICT[select_type]
-        fetch_temp = await dbs.execute(
-            select(data_model).slice((page - 1) * 10, page * 10).order_by(desc(data_model.operation_time)))
+        if data_model != ActivityModel:
+            fetch_temp = await dbs.execute(
+                select(data_model).slice((page - 1) * 10, page * 10))
+        else:
+            fetch_temp = await dbs.execute(
+                select(data_model).slice((page - 1) * 10, page * 10).order_by(desc(data_model.id)))
         count_temp = await dbs.execute(count(data_model.id))
         result = get_dict_result(data=fetch_temp, count=count_temp, model=data_model.__name__)
         return result
@@ -234,7 +238,7 @@ async def delete_data(delete_type: DeleteType, token: str = Cookie(...), del_id:
 
         fetch_temp = await dbs.execute(select(delete_model.keys).where(delete_model.id == del_id))
         keys_result = get_dict_result(data=fetch_temp)
-        if len(keys_result['data']) > 0:
+        if keys_result['data'][0]['keys'] is not None:
             if not uploader.delete_file(keys_result['data'][0]['keys'].split(';')):
                 return Response(status_code=404)
 
